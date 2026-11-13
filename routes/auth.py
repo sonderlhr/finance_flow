@@ -1,7 +1,8 @@
-from extensions import db
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
-from models import Usuario
+
+from extensions import db
+from models import Categoria, Conta, Usuario
 
 auth = Blueprint("auth", __name__)
 
@@ -13,7 +14,7 @@ def cadastro():
     if request.method == "POST":
         
         nome = request.form.get("nome", "").strip()
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         senha = request.form.get("senha", "")
 
 
@@ -35,6 +36,29 @@ def cadastro():
         novo_usuario.definir_senha(senha)
         
         db.session.add(novo_usuario)
+        db.session.commit()
+        
+        conta_padrao = Conta(
+            nome="Carteira",
+            tipo="Carteira",
+            saldo_inicial=0,
+            usuario_id=novo_usuario.id
+        )
+        db.session.add(conta_padrao)
+
+        categorias_padrao = [
+            ("Salário", "receita"),
+            ("Outros Ganhos", "receita"),
+            ("Alimentação", "despesa"),
+            ("Transporte", "despesa"),
+            ("Moradia", "despesa"),
+            ("Lazer", "despesa"),
+        ]
+        for nome_cat, tipo_cat in categorias_padrao:
+            db.session.add(
+                Categoria(nome=nome_cat, tipo=tipo_cat, usuario_id=novo_usuario.id)
+            )
+
         db.session.commit()
         
         flash("Cadastro realizado com sucesso!")
@@ -59,7 +83,7 @@ def login():
 
         if usuario and usuario.verificar_senha(senha):
             login_user(usuario)
-            return redirect(url_for("home"))
+            return redirect(url_for("financeiro.dashboard"))
 
         flash("E-mail ou senha incorretos.")
 

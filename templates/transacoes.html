@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Transações | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Minhas Transações</h1>
+
+    <h2>Nova Transação</h2>
+    <form method="POST">
+        <label for="descricao">Descrição:</label><br>
+        <input type="text" id="descricao" name="descricao" required>
+        <br><br>
+
+        <label for="valor">Valor (R$):</label><br>
+        <input type="text" id="valor" name="valor" placeholder="150,00" required>
+        <br><br>
+
+        <label for="tipo">Tipo:</label><br>
+        <select id="tipo" name="tipo" required>
+            <option value="despesa">Despesa</option>
+            <option value="receita">Receita</option>
+        </select>
+        <br><br>
+
+        <label for="data">Data:</label><br>
+        <input type="date" id="data" name="data" required>
+        <br><br>
+
+        <label for="conta_id">Conta:</label><br>
+        <select id="conta_id" name="conta_id" required>
+            {% for conta in contas %}
+                <option value="{{ conta.id }}">{{ conta.nome }}</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="categoria_id">Categoria:</label><br>
+        <select id="categoria_id" name="categoria_id" required>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}">{{ categoria.nome }} ({{ categoria.tipo }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+
+        <label for="repetir_meses">Repetir mensalmente (meses — deixe 1 para lançamento único):</label><br>
+        <input type="number" id="repetir_meses" name="repetir_meses" value="1" min="1" max="60">
+        <br><br>
+
+        <button type="submit">Registrar Transação</button>
+    </form>
+
+    <hr>
+
+    <h2>Filtrar Histórico</h2>
+    <form method="GET" action="{{ url_for('financeiro.transacoes') }}">
+        <label for="mes">Mês:</label>
+        <select id="mes" name="mes">
+            {% set meses = [
+                (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+                (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+                (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro')
+            ] %}
+            {% for num, nome in meses %}
+                <option value="{{ num }}" {% if num == mes_atual %}selected{% endif %}>{{ nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="ano">Ano:</label>
+        <input type="number" id="ano" name="ano" value="{{ ano_atual }}" min="2000" max="2100" style="width: 75px;">
+
+        <label for="filtro_tipo">Tipo:</label>
+        <select id="filtro_tipo" name="tipo">
+            <option value="">Todos</option>
+            <option value="receita" {% if filtro_tipo == "receita" %}selected{% endif %}>Receita</option>
+            <option value="despesa" {% if filtro_tipo == "despesa" %}selected{% endif %}>Despesa</option>
+        </select>
+
+        <label for="filtro_conta">Conta:</label>
+        <select id="filtro_conta" name="conta_id">
+            <option value="">Todas</option>
+            {% for conta in contas %}
+                <option value="{{ conta.id }}" {% if filtro_conta == conta.id %}selected{% endif %}>{{ conta.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="filtro_categoria">Categoria:</label>
+        <select id="filtro_categoria" name="categoria_id">
+            <option value="">Todas</option>
+            {% for categoria in categorias %}
+                <option value="{{ categoria.id }}" {% if filtro_categoria == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Aplicar Filtros</button>
+        <a href="{{ url_for('financeiro.transacoes') }}">Limpar</a>
+        <a href="{{ url_for('financeiro.exportar_transacoes', mes=mes_atual, ano=ano_atual, tipo=filtro_tipo, conta_id=filtro_conta, categoria_id=filtro_categoria) }}">Exportar CSV</a>
+    </form>
+
+    <br>
+
+    {% if transacoes %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Conta</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transacoes %}
+                    <tr>
+                        <td>{{ t.data.strftime("%d/%m/%Y") }}</td>
+                        <td>{{ t.descricao }}</td>
+                        <td>{{ t.categoria.nome }}</td>
+                        <td>{{ t.conta.nome }}</td>
+                        <td>{{ t.tipo }}</td>
+                        <td>R$ {{ "%.2f"|format(t.valor) }}</td>
+                        <td>
+                            <a href="{{ url_for('financeiro.editar_transacao', transacao_id=t.id) }}">Editar</a>
+                            <form method="POST" action="{{ url_for('financeiro.excluir_transacao', transacao_id=t.id) }}" style="display:inline;" onsubmit="return confirm('Deseja realmente excluir esta transação?');">
+                                <button type="submit">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma transação encontrada para os filtros selecionados.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Categorias | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Minhas Categorias</h1>
+
+    <h2>Nova Categoria</h2>
+    <form method="POST">
+        <label for="nome">Nome da Categoria (ex: Alimentação, Salário):</label><br>
+        <input type="text" id="nome" name="nome" required>
+        <br><br>
+
+        <label for="tipo">Tipo:</label><br>
+        <select id="tipo" name="tipo" required>
+            <option value="despesa">Despesa</option>
+            <option value="receita">Receita</option>
+        </select>
+        <br><br>
+
+        <button type="submit">Salvar Categoria</button>
+    </form>
+
+    <hr>
+
+    <h2>Categorias Cadastradas</h2>
+    {% if categorias %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for categoria in categorias %}
+                    <tr>
+                        <td>{{ categoria.nome }}</td>
+                        <td>{{ categoria.tipo }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('financeiro.excluir_categoria', categoria_id=categoria.id) }}" onsubmit="return confirm('Deseja excluir esta categoria?');">
+                                <button type="submit">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma categoria cadastrada ainda.</p>
+    {% endif %}
+{% endblock %}

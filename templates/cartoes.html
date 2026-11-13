@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Cartões | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Meus Cartões de Crédito</h1>
+
+    <h2>Novo Cartão</h2>
+    <form method="POST">
+        <label for="nome">Nome do Cartão (ex: Nubank Roxinho, Inter):</label><br>
+        <input type="text" id="nome" name="nome" required>
+        <br><br>
+
+        <label for="limite">Limite Total (R$):</label><br>
+        <input type="text" id="limite" name="limite" placeholder="1500,00" required>
+        <br><br>
+
+        <label for="dia_fechamento">Dia de Fechamento da Fatura (1 a 31):</label><br>
+        <input type="number" id="dia_fechamento" name="dia_fechamento" min="1" max="31" required>
+        <br><br>
+
+        <label for="dia_vencimento">Dia de Vencimento da Fatura (1 a 31):</label><br>
+        <input type="number" id="dia_vencimento" name="dia_vencimento" min="1" max="31" required>
+        <br><br>
+
+        <button type="submit">Salvar Cartão</button>
+    </form>
+
+    <hr>
+
+    <h2>Cartões Cadastrados</h2>
+    {% if cartoes %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Cartão</th>
+                    <th>Limite</th>
+                    <th>Fechamento</th>
+                    <th>Vencimento</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cartao in cartoes %}
+                    <tr>
+                        <td><strong>{{ cartao.nome }}</strong></td>
+                        <td>R$ {{ "%.2f"|format(cartao.limite) }}</td>
+                        <td>Dia {{ cartao.dia_fechamento }}</td>
+                        <td>Dia {{ cartao.dia_vencimento }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('financeiro.excluir_cartao', cartao_id=cartao.id) }}" onsubmit="return confirm('Deseja excluir este cartão?');">
+                                <button type="submit">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhum cartão cadastrado ainda.</p>
+    {% endif %}
+{% endblock %}

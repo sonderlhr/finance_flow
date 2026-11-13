@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Metas | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Minhas Metas Financeiras</h1>
+
+    <h2>Nova Meta</h2>
+    <form method="POST">
+        <label for="nome">Objetivo (ex: Reserva de Emergência, Viagem):</label><br>
+        <input type="text" id="nome" name="nome" required>
+        <br><br>
+
+        <label for="valor_objetivo">Valor Objetivo (R$):</label><br>
+        <input type="text" id="valor_objetivo" name="valor_objetivo" placeholder="5000,00" required>
+        <br><br>
+
+        <label for="valor_atual">Quanto já guardou (R$):</label><br>
+        <input type="text" id="valor_atual" name="valor_atual" value="0,00">
+        <br><br>
+
+        <label for="prazo">Prazo (opcional):</label><br>
+        <input type="date" id="prazo" name="prazo">
+        <br><br>
+
+        <button type="submit">Criar Meta</button>
+    </form>
+
+    <hr>
+
+    <h2>Metas em Andamento</h2>
+    {% if metas %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Meta</th>
+                    <th>Guardado / Objetivo</th>
+                    <th>Progresso</th>
+                    <th>Prazo</th>
+                    <th>Adicionar Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meta in metas %}
+                    {% set percentual = (meta.valor_atual / meta.valor_objetivo * 100) if meta.valor_objetivo > 0 else 0 %}
+                    <tr>
+                        <td><strong>{{ meta.nome }}</strong></td>
+                        <td>R$ {{ "%.2f"|format(meta.valor_atual) }} / R$ {{ "%.2f"|format(meta.valor_objetivo) }}</td>
+                        <td>
+                            {{ "%.1f"|format(percentual) }}%
+                            {% if meta.valor_atual >= meta.valor_objetivo %} (Concluída!){% endif %}
+                        </td>
+                        <td>{{ meta.prazo.strftime("%d/%m/%Y") if meta.prazo else "Sem prazo" }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('financeiro.depositar_meta', meta_id=meta.id) }}">
+                                <input type="text" name="valor" placeholder="50,00" size="8" required>
+                                <button type="submit">+ Guardar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('financeiro.editar_meta', meta_id=meta.id) }}">Editar</a>
+                            <form method="POST" action="{{ url_for('financeiro.excluir_meta', meta_id=meta.id) }}" style="display:inline;" onsubmit="return confirm('Deseja excluir esta meta?');">
+                                <button type="submit">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma meta cadastrada ainda.</p>
+    {% endif %}
+{% endblock %}

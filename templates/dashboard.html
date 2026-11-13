@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Dashboard Financeiro</h1>
+
+    <form method="GET" action="{{ url_for('financeiro.dashboard') }}">
+        <label for="mes">Mês:</label>
+        <select id="mes" name="mes">
+            {% set meses = [
+                (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+                (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+                (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro')
+            ] %}
+            {% for num, nome in meses %}
+                <option value="{{ num }}" {% if num == mes_atual %}selected{% endif %}>{{ nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="ano">Ano:</label>
+        <input type="number" id="ano" name="ano" value="{{ ano_atual }}" min="2000" max="2100" style="width: 80px;">
+
+        <button type="submit">Filtrar Período</button>
+    </form>
+
+    <hr>
+
+    <h2>Resumo Geral</h2>
+    <ul>
+        <li><strong>Saldo Total Acumulado (todas as contas):</strong> R$ {{ "%.2f"|format(saldo_total) }}</li>
+        <li><strong>Receitas ({{ "%02d"|format(mes_atual) }}/{{ ano_atual }}):</strong> R$ {{ "%.2f"|format(total_receitas) }}</li>
+        <li><strong>Despesas ({{ "%02d"|format(mes_atual) }}/{{ ano_atual }}):</strong> R$ {{ "%.2f"|format(total_despesas) }}</li>
+        <li><strong>Balanço do Mês:</strong> R$ {{ "%.2f"|format(total_receitas - total_despesas) }}</li>
+    </ul>
+
+    <hr>
+
+    <h2>Despesas por Categoria ({{ "%02d"|format(mes_atual) }}/{{ ano_atual }})</h2>
+    {% if resumo_categorias %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Categoria</th>
+                    <th>Total Gasto</th>
+                    <th>% das Despesas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in resumo_categorias %}
+                    <tr>
+                        <td>{{ item.categoria }}</td>
+                        <td>R$ {{ "%.2f"|format(item.total) }}</td>
+                        <td>{{ "%.1f"|format(item.percentual) }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma despesa registrada neste período.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Minhas Contas</h2>
+    {% if contas_com_saldo %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Conta</th>
+                    <th>Tipo</th>
+                    <th>Saldo Atual</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in contas_com_saldo %}
+                    <tr>
+                        <td>{{ item.conta.nome }}</td>
+                        <td>{{ item.conta.tipo }}</td>
+                        <td>R$ {{ "%.2f"|format(item.saldo_atual) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma conta cadastrada ainda. <a href="{{ url_for('financeiro.contas') }}">Cadastrar conta</a></p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Últimas Transações ({{ "%02d"|format(mes_atual) }}/{{ ano_atual }})</h2>
+    {% if ultimas_transacoes %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    <th>Categoria</th>
+                    <th>Conta</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in ultimas_transacoes %}
+                    <tr>
+                        <td>{{ t.data.strftime("%d/%m/%Y") }}</td>
+                        <td>{{ t.descricao }}</td>
+                        <td>{{ t.categoria.nome }}</td>
+                        <td>{{ t.conta.nome }}</td>
+                        <td>{{ t.tipo }}</td>
+                        <td>R$ {{ "%.2f"|format(t.valor) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma transação registrada neste período.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Contas | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Minhas Contas</h1>
+
+    <h2>Nova Conta</h2>
+    <form method="POST">
+        <label for="nome">Nome da Conta (ex: Nubank, Carteira):</label><br>
+        <input type="text" id="nome" name="nome" required>
+        <br><br>
+
+        <label for="tipo">Tipo:</label><br>
+        <select id="tipo" name="tipo" required>
+            <option value="Conta Corrente">Conta Corrente</option>
+            <option value="Poupança">Poupança</option>
+            <option value="Carteira">Carteira</option>
+            <option value="Investimento">Investimento</option>
+        </select>
+        <br><br>
+
+        <label for="saldo_inicial">Saldo Inicial (R$):</label><br>
+        <input type="text" id="saldo_inicial" name="saldo_inicial" value="0,00">
+        <br><br>
+
+        <button type="submit">Salvar Conta</button>
+    </form>
+
+    <hr>
+
+    <h2>Contas Cadastradas</h2>
+    {% if contas %}
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Saldo Inicial</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conta in contas %}
+                    <tr>
+                        <td>{{ conta.nome }}</td>
+                        <td>{{ conta.tipo }}</td>
+                        <td>R$ {{ "%.2f"|format(conta.saldo_inicial) }}</td>
+                        <td>
+                            <form method="POST" action="{{ url_for('financeiro.excluir_conta', conta_id=conta.id) }}" onsubmit="return confirm('Deseja excluir esta conta?');">
+                                <button type="submit">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhuma conta cadastrada ainda.</p>
+    {% endif %}
+{% endblock %}

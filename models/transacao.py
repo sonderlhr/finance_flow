@@ -51,5 +51,8 @@ class Transacao(db.Model):
         default=db.func.current_timestamp()
     )
     
+    conta = db.relationship("Conta", backref="transacoes")
+    categoria = db.relationship("Categoria", backref="transacoes")
+    
     def __repr__(self):
         return f"<Transacao {self.descricao}>"

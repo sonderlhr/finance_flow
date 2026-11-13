@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FinanceFlow{% endblock%}</title>
+</head>
+
+<body>
+
+    <nav>
+        <strong>FinanceFlow</strong> |
+        <a href="{{ url_for('financeiro.dashboard') }}">Dashboard</a> |
+        <a href="{{url_for('financeiro.transacoes')}}">Transações</a> |
+        <a href="{{ url_for('financeiro.contas') }}">Contas</a> |
+        <a href="{{ url_for('financeiro.categorias') }}">Categorias</a> |
+        <a href="{{ url_for('financeiro.cartoes') }}">Cartões</a> |
+        <a href="{{ url_for('financeiro.metas') }}">Metas</a> |
+        <a href="{{ url_for('auth.logout') }}">Sair ({{ current_user.nome }})</a>        
+    </nav>
+
+    <hr>
+
+    {% with mensagens = get_flashed_messages() %}
+        {% for mensagem in mensagens %}
+            <p><strong>{{ mensagem }}</strong></p>
+        {% endfor %}
+    {% endwith%}
+
+    {% block content %}{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Meta | FinanceFlow{% endblock %}
+
+{% block content %}
+    <h1>Editar Meta</h1>
+
+    <form method="POST">
+        <label for="nome">Objetivo:</label><br>
+        <input type="text" id="nome" name="nome" value="{{ meta.nome }}" required>
+        <br><br>
+
+        <label for="valor_objetivo">Valor Objetivo (R$):</label><br>
+        <input type="text" id="valor_objetivo" name="valor_objetivo" value="{{ '%.2f'|format(meta.valor_objetivo) }}" required>
+        <br><br>
+
+        <label for="valor_atual">Valor Guardado (R$):</label><br>
+        <input type="text" id="valor_atual" name="valor_atual" value="{{ '%.2f'|format(meta.valor_atual) }}">
+        <br><br>
+
+        <label for="prazo">Prazo (opcional):</label><br>
+        <input type="date" id="prazo" name="prazo" value="{{ meta.prazo.strftime('%Y-%m-%d') if meta.prazo else '' }}">
+        <br><br>
+
+        <button type="submit">Salvar Alterações</button>
+        <a href="{{ url_for('financeiro.metas') }}">Cancelar</a>
+    </form>
+{% endblock %}
